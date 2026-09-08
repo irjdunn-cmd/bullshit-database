@@ -780,7 +780,7 @@ a{color:var(--cyan2);}
  .hdr{align-items:stretch;} .hdrlogo{width:74px;padding:4px;} .hdrlogo .fraudlogo{width:64px;height:64px;}
  .titlebar{padding:6px 10px;gap:8px;} .bigtitle{font-size:15px;letter-spacing:.06em;} .bigtitle span{display:block;font-size:11px;margin-top:2px;} .acro{display:none;} .titlebar>div:last-child{display:none;}
  .classbar{display:none;}
- .top{padding:6px 8px;gap:6px;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;} .top::-webkit-scrollbar{display:none;} .top>*{flex-shrink:0;} .top h1,.top .pill,#exportGeo{display:none;} .top .seg{flex-shrink:0;} .top .seg span,.top .btn{padding:9px 11px;font-size:11px;white-space:nowrap;} #wbwrap{flex-shrink:0;}
+ .top{padding:6px 8px;gap:6px;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;} .top::-webkit-scrollbar{display:none;} .top>*{flex-shrink:0;} .top h1,.top .pill,#exportGeo,#viewmode{display:none;} #methodBtn{display:inline-block;} .top .seg{flex-shrink:0;} .top .seg span,.top .btn{padding:9px 11px;font-size:11px;white-space:nowrap;} #wbwrap{flex-shrink:0;}
  .kpis{overflow-x:auto;-webkit-overflow-scrolling:touch;} .kpi{min-width:118px;padding:6px 10px;} .kpi .v{font-size:15px;}
  html,body{position:fixed;inset:0;overflow:hidden;height:100%;overscroll-behavior:none;}
  #wrap{height:100%;}
@@ -851,6 +851,7 @@ a{color:var(--cyan2);}
    <button class="btn" id="exportCsv">EXPORT CSV ▾ filtered</button>
    <button class="btn" id="exportGeo">EXPORT GEOJSON ▾ filtered</button>
    <button class="btn" id="themeBtn" title="Toggle light / dark">☾ DARK</button>
+   <button class="btn" id="methodBtn" style="display:none">? METHOD</button>
  </div>
  <div class="kpis">
    <div class="kpi"><span class="v" style="color:var(--cyan2)" id="kN">–</span><span class="l">Parcels in view</span></div>
@@ -965,11 +966,11 @@ a{color:var(--cyan2);}
    </div>
  <div class="mnav" id="mnav">
    <button data-m="map" class="on"><i>🗺</i>Map</button>
-   <button data-m="parcel" id="mnavParcel"><i>▣</i>Parcel</button>
    <button data-m="list"><i>☰</i>List</button>
+   <button data-m="table"><i>▦</i>Table</button>
+   <button data-m="parcel" id="mnavParcel"><i>▣</i>Parcel</button>
    <button data-m="filters"><i>⚲</i>Filters</button>
    <button data-m="owners"><i>◎</i>Owners</button>
-   <button data-m="method"><i>?</i>Method</button>
  </div>
  </div>
 </div>
@@ -1221,7 +1222,7 @@ const thead=document.querySelector('#ptable thead');
 thead.addEventListener('click',e=>{const sb=e.target.closest('.sb');if(sb){tSort[tMode]=[sb.dataset.k,sb.dataset.d==='asc'];renderTable();return;}
   if(e.target.tagName==='INPUT')return;const th=e.target.closest('th');if(!th||!th.dataset.k)return;const [k,asc]=tSort[tMode];tSort[tMode]=[th.dataset.k,k===th.dataset.k?!asc:false];renderTable();});
 let fT=null;thead.addEventListener('input',e=>{if(e.target.tagName!=='INPUT')return;tFilt[tMode][e.target.dataset.k]=e.target.value;clearTimeout(fT);fT=setTimeout(()=>{const act=document.activeElement,k=act&&act.dataset.k,pos=act&&act.selectionStart;renderTable();if(k){const el=thead.querySelector(`input[data-k="${k}"]`);if(el){el.focus();el.setSelectionRange(pos,pos);}}},250);});
-document.querySelector('#ptable tbody').addEventListener('click',e=>{const ml=e.target.closest('.maplink');if(ml){select(+ml.dataset.i);setView('map');if(isMobile())setMobile('map');return;}
+document.querySelector('#ptable tbody').addEventListener('click',e=>{const ml=e.target.closest('.maplink');if(ml){select(+ml.dataset.i);if(isMobile())setMobile('map');else setView('map');return;}
   const ol=e.target.closest('.ownlink');if(ol){const o=decodeURIComponent(ol.dataset.o);document.getElementById('q').value=o;curQ=o.toLowerCase();tMode='parcels';refresh();return;}
   const tr=e.target.closest('tr[data-i]');if(tr)select(+tr.dataset.i);});
 document.getElementById('tmode').addEventListener('click',e=>{const s=e.target.closest('span[data-t]');if(s){tMode=s.dataset.t;renderTable();}});
@@ -1266,13 +1267,14 @@ document.getElementById('sidetoggle').onclick=()=>document.getElementById('side'
 const isMobile=()=>window.innerWidth<=820;let mMode='map';
 function setMobile(m){mMode=m;const side=document.getElementById('side');
   document.querySelectorAll('#mnav button').forEach(b=>b.classList.toggle('on',b.dataset.m===m));
-  if(m==='map'){side.classList.remove('open');side.removeAttribute('data-m');setTimeout(()=>map.invalidateSize(),50);return;}
+  if(m==='map'||m==='table'){side.classList.remove('open');side.removeAttribute('data-m');setView(m);setTimeout(()=>map.invalidateSize(),50);return;}
   side.classList.add('open');side.setAttribute('data-m',m);
   if(m==='filters')document.getElementById('fwrap').classList.remove('collapsed');
   if(m==='list'||m==='parcel'||m==='filters'){document.querySelectorAll('.pane').forEach(x=>x.classList.toggle('on',x.id==='pane-parcels'));}
   if(m==='owners'){document.querySelectorAll('.pane').forEach(x=>x.classList.toggle('on',x.id==='pane-owners'));}
   if(m==='method'){document.querySelectorAll('.pane').forEach(x=>x.classList.toggle('on',x.id==='pane-method'));}}
 document.getElementById('mnav').addEventListener('click',e=>{const b=e.target.closest('button');if(b)setMobile(b.dataset.m);});
+document.getElementById('methodBtn').onclick=()=>setMobile('method');
 window.addEventListener('resize',()=>{if(!isMobile()){document.getElementById('side').classList.remove('open');document.getElementById('side').removeAttribute('data-m');document.querySelectorAll('.pane').forEach(x=>x.classList.toggle('on',x.id==='pane-parcels'));}map.invalidateSize();});
 const cities=[...new Set(P.map(p=>p.city).filter(Boolean))].sort();document.getElementById('city').innerHTML+=cities.map(c=>`<option>${c}</option>`).join('');
 // ---- export ----
