@@ -785,10 +785,9 @@ a{color:var(--cyan2);}
  .hdr{align-items:stretch;} .hdrlogo{width:74px;padding:4px;} .hdrlogo .fraudlogo{width:64px;height:64px;}
  .titlebar{padding:6px 10px;gap:8px;} .bigtitle{font-size:15px;letter-spacing:.06em;} .bigtitle span{display:inline;font-size:11px;margin-left:4px;} .acro{display:block;font-size:9.5px;letter-spacing:.03em;margin-top:3px;line-height:1.25;} .titlebar>div:last-child{display:none;}
  .classbar{display:none;}
- .top{padding:6px 8px;gap:6px;flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none;touch-action:pan-x;overscroll-behavior-x:contain;transform:translateZ(0);position:relative;min-width:0;width:100%;}
- .hdrrows{min-width:0;overflow:hidden;}
- .kpis{touch-action:pan-x;overscroll-behavior-x:contain;transform:translateZ(0);} .top::-webkit-scrollbar{display:none;} .top>*{flex-shrink:0;} .top h1,.top .pill,#exportGeo,#viewmode{display:none;} #methodBtn{display:inline-block;} .top .seg{flex-shrink:0;} .top .seg span,.top .btn{padding:9px 11px;font-size:11px;white-space:nowrap;} #wbwrap{flex-shrink:0;}
- .kpis{overflow-x:auto;-webkit-overflow-scrolling:touch;} .kpi{min-width:118px;padding:6px 10px;} .kpi .v{font-size:15px;}
+ .top{padding:6px 8px;gap:6px;flex-wrap:wrap;overflow:visible;} .top>*{flex-shrink:0;} .top h1,.top .pill,#exportGeo,#viewmode,#methodBtn{display:none;} #ctog{display:inline-block!important;} .top:not(.open)>*:not(#ctog){display:none!important;} .top .seg{flex-shrink:1;flex-wrap:wrap;max-width:100%;} .top .seg span,.top .btn{padding:8px 10px;font-size:10.5px;white-space:nowrap;} #wbwrap{flex-shrink:0;}
+ .hdrrows{min-width:0;}
+ .kpis{flex-wrap:wrap;overflow:visible;} .kpi{flex:1 1 45%;min-width:0;padding:4px 8px;} .kpi .v{font-size:14px;} .kpi:nth-child(n+5){display:none;} body.ctrl-open .kpi:nth-child(n+5){display:flex;}
  html,body{position:fixed;inset:0;overflow:hidden;height:100%;width:100%;overscroll-behavior:none;touch-action:manipulation;}
  #wrap{height:100%;height:var(--vvh,100%);}
  .side .pane.on,.top,.kpis,#tablewrap{overscroll-behavior:contain;}
@@ -814,7 +813,7 @@ a{color:var(--cyan2);}
  .r{font-size:12.5px;} .detail{padding:12px;} .hero .cell .v{font-size:19px;} .hero .out .v{font-size:24px;}
  .sidetoggle{display:none;}
  .mnav{display:flex;position:fixed;left:0;right:0;bottom:0;height:calc(58px + env(safe-area-inset-bottom));z-index:2000;background:var(--panel);border-top:1px solid var(--line2);padding-bottom:env(safe-area-inset-bottom);}
- .mnav button{flex:1;background:none;border:0;border-right:1px solid var(--line);color:var(--muted);font-family:var(--h);font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:0;} .mnav button:last-child{border-right:0;}
+ .mnav button{flex:1;min-width:0;background:none;border:0;border-right:1px solid var(--line);color:var(--muted);font-family:var(--h);font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:0;} .mnav button:last-child{border-right:0;}
  .mnav button i{font-style:normal;font-size:18px;line-height:1;} .mnav button.on{color:var(--cyan2);background:var(--cyansoft);} .mnav button.hot{color:var(--red);}
  #ptable td,#ptable th{padding:8px 8px;font-size:12px;} #ptable tr.frow input{font-size:16px;padding:6px;}
 }
@@ -866,7 +865,7 @@ a{color:var(--cyan2);}
    <div class="acro" style="text-align:right;color:var(--faint)">Polk County, Florida · agricultural-classification screen<br>F.S. 193.461 · public record</div>
  </div>
  <div class="classbar"><span class="dot"></span>POLK COUNTY, FL · PROPERTY APPRAISER GIS · <span id="pulled"></span> · public record<span style="flex-grow:1"></span><span style="color:var(--faint)" id="mode"></span></div>
- <div class="top">
+ <div class="top" id="topbar"><span class="btn" id="ctog" style="display:none">⚙ CONTROLS ▾</span>
    <h1>AG-CLASSIFICATION FINDER</h1>
    <span class="pill" id="pillN"></span><span class="pill">Polk County ag-classification screen · F.S. 193.461</span>
    <div style="flex-grow:1"></div>
@@ -997,6 +996,7 @@ a{color:var(--cyan2);}
    <button data-m="parcel" id="mnavParcel"><i>▣</i>Parcel</button>
    <button data-m="filters"><i>⚲</i>Filters</button>
    <button data-m="owners"><i>◎</i>Owners</button>
+   <button data-m="method"><i>?</i>Method</button>
  </div>
  </div>
 </div>
@@ -1312,6 +1312,7 @@ function setMobile(m){mMode=m;const side=document.getElementById('side');
   if(m==='method'){document.querySelectorAll('.pane').forEach(x=>x.classList.toggle('on',x.id==='pane-method'));}}
 document.getElementById('mnav').addEventListener('click',e=>{const b=e.target.closest('button');if(b)setMobile(b.dataset.m);});
 document.getElementById('methodBtn').onclick=()=>setMobile('method');
+document.getElementById('ctog').onclick=()=>{const t=document.getElementById('topbar');t.classList.toggle('open');document.body.classList.toggle('ctrl-open',t.classList.contains('open'));document.getElementById('ctog').textContent=t.classList.contains('open')?'⚙ CONTROLS ▴':'⚙ CONTROLS ▾';setTimeout(()=>map.invalidateSize(),50);};
 window.addEventListener('resize',()=>{if(!isMobile()){document.getElementById('side').classList.remove('open');document.getElementById('side').removeAttribute('data-m');document.querySelectorAll('.pane').forEach(x=>x.classList.toggle('on',x.id==='pane-parcels'));}map.invalidateSize();});
 const cities=[...new Set(P.map(p=>p.city).filter(Boolean))].sort();document.getElementById('city').innerHTML+=cities.map(c=>`<option>${c}</option>`).join('');
 // ---- export ----
