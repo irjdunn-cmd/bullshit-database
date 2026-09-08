@@ -739,6 +739,7 @@ select option,.dsel option{background:var(--panel);color:var(--text);} select op
 #loading .stampspin{width:160px;height:160px;animation:pulse 1.2s ease-in-out infinite;} @keyframes pulse{0%,100%{transform:scale(1);opacity:.85}50%{transform:scale(1.06);opacity:1}}
 #loading .ltxt{font-family:var(--h);font-size:13px;letter-spacing:.2em;color:var(--cyan2);}
 #loading .lbar{width:200px;height:4px;background:var(--line);border-radius:2px;overflow:hidden;} #loading .lbar i{display:block;height:100%;width:40%;background:var(--cyan);animation:slide 1s linear infinite;} @keyframes slide{0%{margin-left:-40%}100%{margin-left:100%}}
+.share{margin-top:10px;padding-top:8px;border-top:1px solid var(--line);} .sharebtns{display:flex;gap:6px;flex-wrap:wrap;margin-top:5px;} .sharebtns .btn{padding:8px 12px;font-size:11px;}
 .hero{margin-top:9px;border:1px solid rgba(255,106,90,.5);border-radius:4px;background:linear-gradient(180deg,rgba(255,106,90,.10),rgba(255,106,90,.03));padding:9px 10px;}
 .hero .row{display:grid;grid-template-columns:1fr auto 1fr;align-items:end;gap:8px;}
 .hero .cell .k{font-family:var(--h);font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);}
@@ -786,8 +787,9 @@ a{color:var(--cyan2);}
  .classbar{display:none;}
  .top{padding:6px 8px;gap:6px;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;} .top::-webkit-scrollbar{display:none;} .top>*{flex-shrink:0;} .top h1,.top .pill,#exportGeo,#viewmode{display:none;} #methodBtn{display:inline-block;} .top .seg{flex-shrink:0;} .top .seg span,.top .btn{padding:9px 11px;font-size:11px;white-space:nowrap;} #wbwrap{flex-shrink:0;}
  .kpis{overflow-x:auto;-webkit-overflow-scrolling:touch;} .kpi{min-width:118px;padding:6px 10px;} .kpi .v{font-size:15px;}
- html,body{position:fixed;inset:0;overflow:hidden;height:100%;overscroll-behavior:none;}
- #wrap{height:100%;}
+ html,body{position:fixed;inset:0;overflow:hidden;height:100%;width:100%;overscroll-behavior:none;touch-action:manipulation;}
+ #wrap{height:100%;height:var(--vvh,100%);}
+ .side .pane.on,.top,.kpis,#tablewrap{overscroll-behavior:contain;}
  .body{position:relative;padding-bottom:calc(58px + env(safe-area-inset-bottom));}
  #map{position:absolute;left:0;top:0;right:0;bottom:calc(58px + env(safe-area-inset-bottom));} #tablewrap{position:absolute;left:0;top:0;right:0;bottom:calc(58px + env(safe-area-inset-bottom));}
  .legend{display:none;} .attrib{display:none;} #imgdate{bottom:64px!important;font-size:9px;}
@@ -1181,12 +1183,23 @@ function detailHTML(p){const c=TIER[p.tier][0];
   <div class="r"><span class="k">Tax due (${p.mill?p.mill.toFixed(2):'?'} mills)</span><span>${money(p.due)}</span></div>
   <div class="r rd"><span class="k">Est. tax shifted by ag class</span><span>${money(p.tax)}/yr</span></div>
   ${p.ex?`<div class="r"><span class="k">Other exemption</span><span>${p.ex}</span></div>`:''}
-  <div style="margin-top:7px;color:var(--amber);font-size:10px;">Verify bona fide commercial ag use — F.S. 193.461 / F.A.C. 12D-5. Screening score only.</div>`;}
+  <div style="margin-top:7px;color:var(--amber);font-size:10px;">Verify bona fide commercial ag use — F.S. 193.461 / F.A.C. 12D-5. Screening score only.</div>
+  <div class="share"><div class="lbl">Share this parcel</div><div class="sharebtns">
+    <button class="btn" data-s="copy">⧉ COPY LINK</button><button class="btn" data-s="sms">✉ TEXT</button><button class="btn" data-s="mail">@ EMAIL</button>${navigator.share?'<button class="btn" data-s="native">⇪ MORE…</button>':''}
+  </div><div id="sharemsg" style="font-size:10px;color:var(--green);min-height:12px;margin-top:3px;"></div></div>`;}
+function shareUrl(p){const u=new URL(location.href);u.hash='p='+p.pid;return u.href;}
+function shareText(p){return `B.U.L.L.S.H.I.T DATABASE - Polk County\n${p.owner} · ${p.situs||'(no situs)'} · ${p.city} · ${p.ac} ac\nTaxed as worth ${money(p.clv)} vs land worth ${money(p.mlv)} — ${money(p.diff)} hidden from the tax roll (${(p.pct*100).toFixed(0)}%)\nTax shifted to everyone else: ${money(p.tax)}/yr · Bona-fide doubt score ${p.score}\nParcel ${p.pid}`;}
+document.getElementById('detail').addEventListener('click',async e=>{const b=e.target.closest('.share button');if(!b||selIdx==null)return;const p=P[selIdx],url=shareUrl(p),txt=shareText(p),msg=document.getElementById('sharemsg');
+  if(b.dataset.s==='copy'){try{await navigator.clipboard.writeText(txt+'\n'+url);msg.textContent='Link and summary copied.';}catch(err){prompt('Copy this link:',url);}}
+  else if(b.dataset.s==='sms'){location.href='sms:?&body='+encodeURIComponent(txt+'\n'+url);}
+  else if(b.dataset.s==='mail'){location.href='mailto:?subject='+encodeURIComponent('B.U.L.L.S.H.I.T DATABASE — '+p.owner+' ('+p.pid+')')+'&body='+encodeURIComponent(txt+'\n\n'+url);}
+  else if(b.dataset.s==='native'){try{await navigator.share({title:'B.U.L.L.S.H.I.T DATABASE - Polk County',text:txt,url});}catch(err){}}
+  setTimeout(()=>{msg.textContent='';},3000);});
 function select(i){if(selIdx!=null&&layers[selIdx])layers[selIdx].setStyle(styleFor(P[selIdx]));
   selIdx=i;const p=P[i],l=layers[i];
   if(l){l.setStyle({color:'#ffe600',weight:3,opacity:1,fillOpacity:fillMode==='fill'?TIER[p.tier][1]:0});l.bringToFront();if(viewMode==='map')map.fitBounds(l.getBounds(),{maxZoom:17,padding:[40,40]});}
   document.querySelectorAll('#ptable tbody tr').forEach(r=>r.classList.toggle('sel',+r.dataset.i===i));
-  document.getElementById('detail').innerHTML=detailHTML(p);document.getElementById('fwrap').classList.add('collapsed');
+  document.getElementById('detail').innerHTML=detailHTML(p);document.getElementById('fwrap').classList.add('collapsed');try{history.replaceState(null,'','#p='+p.pid);}catch(err){}
   document.querySelectorAll('.lrow').forEach(e=>e.classList.toggle('sel',+e.dataset.i===i));
   if(isMobile()){setMobile('parcel');document.getElementById('mnavParcel').classList.add('hot');}}
 let vis=[];
@@ -1309,5 +1322,18 @@ document.getElementById('exportGeo').onclick=()=>{const fc={type:'FeatureCollect
   dl('polk_ag_screen_'+stamp()+'.geojson',JSON.stringify(fc),'application/geo+json');};
 refresh();
 setTimeout(()=>{const l=document.getElementById('loading');if(l){l.style.transition='opacity .3s';l.style.opacity='0';setTimeout(()=>l.remove(),320);}},50);
+// ---- deep link: #p=<parcel id> ----
+(function(){const m=(location.hash||'').match(/p=(\d{15,20})/);if(!m)return;const p=P.find(x=>x.pid===m[1]);if(!p)return;
+  setTimeout(()=>{select(p.i);if(isMobile())setMobile('parcel');},300);})();
+// ---- iOS viewport guard: keep the app frame pinned when Safari scrolls the window (focus, rubber-band, toolbar) ----
+(function(){if(!isMobile())return;const vv=window.visualViewport;
+  function fit(){if(!isMobile()){document.documentElement.style.removeProperty('--vvh');return;}
+    const h=vv?Math.round(vv.height):window.innerHeight;document.documentElement.style.setProperty('--vvh',h+'px');
+    if(window.scrollY||window.scrollX)window.scrollTo(0,0);if(vv&&(vv.offsetTop||vv.offsetLeft))window.scrollTo(0,0);map.invalidateSize();}
+  fit();if(vv){vv.addEventListener('resize',fit);vv.addEventListener('scroll',fit);}
+  window.addEventListener('scroll',()=>{if(window.scrollY||window.scrollX)window.scrollTo(0,0);},{passive:true});
+  window.addEventListener('orientationchange',()=>setTimeout(fit,300));
+  document.addEventListener('focusout',()=>setTimeout(fit,50));
+  document.addEventListener('touchend',()=>{if(window.scrollY)window.scrollTo(0,0);},{passive:true});})();
 
 </script></body></html>
