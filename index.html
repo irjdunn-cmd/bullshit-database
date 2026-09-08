@@ -735,6 +735,10 @@ select option,.dsel option{background:var(--panel);color:var(--text);} select op
 #ptable td.l{max-width:260px;overflow:hidden;text-overflow:ellipsis;}
 #ptable tr:hover td{background:var(--cyansoft);cursor:pointer;} #ptable tr.sel td{background:rgba(255,230,0,.09);}
 #ptable td.red{color:var(--red);} #ptable td.am{color:var(--amber);} #ptable td.cy{color:var(--cyan2);} #ptable td.dim{color:var(--faint);}
+#loading{position:fixed;inset:0;z-index:5000;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;}
+#loading .stampspin{width:160px;height:160px;animation:pulse 1.2s ease-in-out infinite;} @keyframes pulse{0%,100%{transform:scale(1);opacity:.85}50%{transform:scale(1.06);opacity:1}}
+#loading .ltxt{font-family:var(--h);font-size:13px;letter-spacing:.2em;color:var(--cyan2);}
+#loading .lbar{width:200px;height:4px;background:var(--line);border-radius:2px;overflow:hidden;} #loading .lbar i{display:block;height:100%;width:40%;background:var(--cyan);animation:slide 1s linear infinite;} @keyframes slide{0%{margin-left:-40%}100%{margin-left:100%}}
 .hero{margin-top:9px;border:1px solid rgba(255,106,90,.5);border-radius:4px;background:linear-gradient(180deg,rgba(255,106,90,.10),rgba(255,106,90,.03));padding:9px 10px;}
 .hero .row{display:grid;grid-template-columns:1fr auto 1fr;align-items:end;gap:8px;}
 .hero .cell .k{font-family:var(--h);font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);}
@@ -795,7 +799,7 @@ a{color:var(--cyan2);}
  .side .pane.on{flex-grow:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;}
  .side[data-m=filters] .fwrap{flex-shrink:0;padding-bottom:40px;border-bottom:0;}
  .side[data-m=parcel] .detail{max-height:none;overflow:visible;flex-grow:0;padding-bottom:40px;}
- .side[data-m=list] .listwrap{overflow:visible;flex-grow:0;padding-bottom:40px;} .side[data-m=owners] #pane-owners .listwrap{overflow:visible;padding-bottom:40px;} .side[data-m=method] .help{overflow:visible;padding-bottom:40px;}
+ .side[data-m=list] .listwrap{overflow:visible;flex-grow:0;padding-bottom:40px;} .side[data-m=owners] #pane-owners .lcount{display:flex;} .side[data-m=owners] #pane-owners .listwrap{display:block;overflow:visible;flex-grow:0;padding-bottom:40px;} .side[data-m=method] .help{overflow:visible;padding-bottom:40px;}
 
  .side[data-m=parcel] .detail{display:block;max-height:none;flex-grow:1;overflow-y:auto;}
  .side[data-m=list] .lcount,.side[data-m=list] .listwrap{display:flex;} .side[data-m=list] .listwrap{display:block;} .side[data-m=list] .lcount .tog{display:none;}
@@ -812,6 +816,24 @@ a{color:var(--cyan2);}
 }
 @media(min-width:821px){.mnav{display:none;}}
 </style></head><body>
+<div id="loading"><div class="stampspin"><svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" class="fraudlogo" aria-label="FRAUD — B.U.L.L.S.H.I.T Database stamp">
+ <defs>
+  <path id="arcTop" d="M40,200 A160,160 0 0,1 360,200"/>
+  <path id="arcBot" d="M40,200 A160,160 0 0,0 360,200"/>
+ </defs>
+ <circle cx="200" cy="200" r="194" fill="none" stroke="#e0202a" stroke-width="8"/>
+ <circle cx="200" cy="200" r="182" fill="none" stroke="#e0202a" stroke-width="2"/>
+ <circle cx="200" cy="200" r="136" fill="none" stroke="#e0202a" stroke-width="3"/>
+ <text font-family="Oxanium,Arial Narrow,Arial,sans-serif" font-size="22" font-weight="700" fill="#e0202a"><textPath href="#arcTop" startOffset="50%" text-anchor="middle" textLength="440" lengthAdjust="spacingAndGlyphs">BUSTING UNLAWFUL LAND-LOOPHOLES, SCHEMES,</textPath></text>
+ <text font-family="Oxanium,Arial Narrow,Arial,sans-serif" font-size="22" font-weight="700" fill="#e0202a"><textPath href="#arcBot" startOffset="50%" text-anchor="middle" textLength="400" lengthAdjust="spacingAndGlyphs">HOAXES &amp; ILLEGITIMATE TAX-BREAKS</textPath></text>
+ <text x="32" y="209" text-anchor="middle" font-size="22" fill="#e0202a">★</text>
+ <text x="368" y="209" text-anchor="middle" font-size="22" fill="#e0202a">★</text>
+ <text x="200" y="152" text-anchor="middle" font-family="Oxanium,Arial,sans-serif" font-size="30" font-weight="700" fill="#e0202a" letter-spacing="2">B.U.L.L.S.H.I.T</text>
+ <text x="200" y="240" text-anchor="middle" font-family="Impact,Oxanium,'Arial Black',sans-serif" font-size="90" font-weight="900" fill="#e0202a" textLength="236" lengthAdjust="spacingAndGlyphs">FRAUD</text>
+ <line x1="90" y1="256" x2="310" y2="256" stroke="#e0202a" stroke-width="2"/>
+ <text x="200" y="285" text-anchor="middle" font-family="Oxanium,Arial,sans-serif" font-size="24" font-weight="700" fill="#e0202a" letter-spacing="1.5">DATABASE</text>
+ <text x="200" y="312" text-anchor="middle" font-family="Oxanium,Arial,sans-serif" font-size="19" font-weight="600" fill="#e0202a" letter-spacing="1">POLK COUNTY</text>
+</svg></div><div class="ltxt">LOADING PARCELS…</div><div class="lbar"><i></i></div></div>
 <div id="wrap">
  <div class="hdr"><div class="hdrlogo"><svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" class="fraudlogo" aria-label="FRAUD — B.U.L.L.S.H.I.T Database stamp">
  <defs>
@@ -1286,5 +1308,6 @@ document.getElementById('exportCsv').onclick=()=>{const cols=['score','tier','pi
 document.getElementById('exportGeo').onclick=()=>{const fc={type:'FeatureCollection',features:vis.filter(p=>RAW.geoms[p.i]).map(p=>{const {why,i,...props}=p;props.why=why.map(w=>w[0]).join('; ');return {type:'Feature',properties:props,geometry:{type:'Polygon',coordinates:RAW.geoms[p.i]}};})};
   dl('polk_ag_screen_'+stamp()+'.geojson',JSON.stringify(fc),'application/geo+json');};
 refresh();
+setTimeout(()=>{const l=document.getElementById('loading');if(l){l.style.transition='opacity .3s';l.style.opacity='0';setTimeout(()=>l.remove(),320);}},50);
 
 </script></body></html>
